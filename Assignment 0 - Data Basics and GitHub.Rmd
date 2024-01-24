@@ -7,5 +7,49 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+install.packages("corrplot")
+library(corrplot)
 ```
+
+```{r}
+loans = read.csv("/Users/leebernstein/Downloads/Advanced BA/Data Files/loan_default_data_set.csv")
+loans
+```
+
+Question 1
+
+There are 21 different columns with 20,000 rows, you can run many different kinds of mo
+
+Question 2 
+
+The two columns that interest me are rep_income and rep_education, I believe that there could be a high correlation between the two
+
+Question 3
+
+
+Question 4
+
+There are some missing values in the pct_card_over_50_uti column
+
+Question 5
+
+Data Visualization
+
+```{r}
+corrplot(loans)
+```
+
+Question 6
+
+Summary Statistics
+```{r}
+summary(loans)
+```
+
+
+
+
+
+
+
 
