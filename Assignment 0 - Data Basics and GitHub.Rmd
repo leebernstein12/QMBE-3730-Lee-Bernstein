@@ -7,8 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-install.packages("corrplot")
-library(corrplot)
+install.packages("ggplot2")
+library(ggplot2)
 ```
 
 ```{r}
@@ -18,7 +18,7 @@ loans
 
 Question 1
 
-There are 21 different columns with 20,000 rows, you can run many different kinds of mo
+There are 21 different columns with 20,000 rows, you can run many different kinds of models, including correlation plots, regression, and predictive models depending on what you are looking for
 
 Question 2 
 
@@ -26,6 +26,7 @@ The two columns that interest me are rep_income and rep_education, I believe tha
 
 Question 3
 
+There are a few different kinds of data types including, doubles (dbl), integers (int), and characters (chr)
 
 Question 4
 
@@ -36,14 +37,14 @@ Question 5
 Data Visualization
 
 ```{r}
-corrplot(loans)
+boxplot(loans$rep_income)
 ```
 
 Question 6
 
 Summary Statistics
 ```{r}
-summary(loans)
+summary(loans$rep_income)
 ```
 
 
