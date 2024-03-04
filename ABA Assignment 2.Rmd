@@ -1,0 +1,97 @@
+---
+title: "ABA Assignment 2"
+author: "Lee Bernstein"
+date: "2024-03-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Part 1
+
+1)
+Linear relationship, multivariate normality, small or no multicollinearity, no auto correlations, Homoscedasticity
+
+2) 
+heart_disease = 15 - .2biking +.178smoking + E
+
+Dependent Variable: heart_disease
+Beta0/Y intercept: 15
+Beta1/Slope coefficient: .2
+X1/ Independent Variable: Biking
+Beta2: .178
+X2: smoking
+E: Error
+
+3)
+sales = B0 + B1 * youtube + B2 * facebook + B3 * newspaper + Error
+
+4)
+```{r}
+library(tidyverse)
+
+df = read.csv("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/Ice Cream Sales - temperatures.csv")
+```
+
+```{r}
+#Summary Statistics 
+#Two column names: Temperature, Ice Cream Profits
+summary(df)
+```
+
+```{r}
+#No missing values
+sum(is.na(df))
+```
+
+```{r}
+#365 Rows, 2 Columns
+dim(df)
+```
+
+```{r}
+#Data Type
+class(df$Temperature)
+class(df$Ice.Cream.Profits)
+```
+
+```{r}
+#There seems to be a correlation between higher temperatures having increased profit
+plot(df)
+```
+
+```{r}
+#Partitioning the data
+library(caret)
+
+#Set seed for reproducibility
+set.seed(1234)
+
+#Creating data partition into 70% training and 30% testing
+index = createDataPartition(df$Temperature, p=.7, list = FALSE)
+
+#Creating the training and testing data
+train_data <- df[index, ]
+test_data  <- df[-index, ]
+```
+
+```{r}
+ctrl <- trainControl(method = "cv", number = 5)
+model_train = train( df$Temperature~ ., data = train_data, method = "lm", trControl = ctrl)
+```
+
+```{r}
+pred_test = predict(ml_model, newdata = test_data)
+```
+
+I think that this dataset fits better into a simple regression model rather than a multi one. Due to the fact that there are only two variables, with one being the dependant variable
+
+
+
+
+
+
+
+
