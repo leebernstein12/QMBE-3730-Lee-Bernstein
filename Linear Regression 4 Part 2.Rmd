@@ -1,0 +1,93 @@
+---
+title: "Linear Regression 4 Part 2"
+author: "Lee Bernstein"
+date: "2024-03-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyverse)
+library(caret)
+
+students = read.csv("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/Student_Performance.csv")
+```
+
+```{r}
+#Summary Statistics
+summary(students)
+```
+From the summary statistics we can see that there are 6 variables/ columns (Hours Studied, Previous Scores, Extracurricular Activities, Sleep Hours, Sample Question Papers Practiced, and Performance Index).
+
+```{r}
+#Checking missing values
+sum(is.na(students))
+```
+0 missing values
+
+```{r}
+#Shape of the data
+dim(students)
+```
+10000 Rows with 6 Columns
+
+```{r}
+#Defining Data Types
+class(students$Hours.Studied)
+class(students$Previous.Scores)
+class(students$Extracurricular.Activities)
+class(students$Sleep.Hours)
+class(students$Sample.Question.Papers.Practiced)
+class(students$Performance.Index)
+```
+
+Multiple Linear Regression
+We use a multiple linear regression in this scenario due to the fact that there are multiple variables that contribute to the target value (Performance Index)
+```{r}
+#Data Partition
+
+set.seed(123)
+
+train_index = createDataPartition(students$Performance.Index, p =.7, list = FALSE, times = 1)
+
+data_train = students[train_index,]
+data_test = students[-train_index,]
+```
+
+```{r}
+#Training model
+model = lm(Performance.Index ~ Hours.Studied + Previous.Scores + Extracurricular.Activities + Sleep.Hours + Sample.Question.Papers.Practiced, data = data_train)
+model
+```
+
+```{r}
+#Predicting model with testing data
+predict_model = predict(model, newdata = data_test)
+summary(predict_model)
+```
+
+```{r}
+#MSE, RMSE, & R Squared Testing Data
+
+mse_test = mean((data_test$Performance.Index - predict_model)^2)
+rmse_test = sqrt(mse_test)
+rsquared_test = 1 - (sum((data_test$Performance.Index - predict_model)^2) / sum((data_test$Performance.Index - mean(data_test$Performance.Index))^2))
+
+mse_test
+rmse_test
+rsquared_test
+```
+Ny looking at the MSE, RMSE, and Rsquared we can determine the error metrics. First, the MSE indicates that on average the predicted value deviates from the actual value by 4.07 units. Second, the RMSE indicates that on average the model's predictions are 2.018 units away from the actaul value. Third, Rsquared 98% of the variance in the dependent variable is explained by the independent variables.
+
+
+
+
+
+
+
+
+
+
+
+
