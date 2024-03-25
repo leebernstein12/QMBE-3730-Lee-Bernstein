@@ -1,0 +1,303 @@
+---
+title: "Assignment 4"
+author: "Lee Bernstein"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+bike = readxl::read_xlsx("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/BicyclingWorld.xlsx")
+repair = readxl::read_xlsx("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/Repair.xlsx")
+alumni = readxl::read_xlsx("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/AlumniGiving.xlsx")
+```
+
+Problem 1
+```{r}
+#A) Scatter chart
+
+plot(bike$Weight, bike$Price,
+     main = "Price v.s Weight",
+     xlab = "Weight",
+     ylab = "Price"
+     )
+```
+From the scatter chart we can see there is a correlation with how a heavier bike tends to less expensive. While lighter bikes are exponentially more expensive. 
+
+```{r}
+#B) Regression
+
+bikemodel = lm(Price ~ Weight, data = bike)
+```
+
+```{r}
+#Summary of model
+summary(bikemodel)
+```
+
+```{r}
+#Coefficients
+bikeint = intercept = coef(bikemodel)[1]
+bikeslope = coef(bikemodel)[2]
+
+bikeint
+bikeslope
+```
+
+```{r}
+#Estimated Regression Equation
+cat("Estimated Regression Equation: price = ", round(bikeint, 2), "+", round(bikeslope,2), "* weight")
+```
+
+```{r}
+#C
+
+bike_alpha = .05
+
+b_p_value_int = summary(bikemodel)$coefficients["(Intercept)", "Pr(>|t|)"]
+
+if(b_p_value_int < bike_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+b_p_value_slope = summary(bikemodel)$coefficients["Weight", "Pr(>|t|)"]
+
+if(b_p_value_slope < bike_alpha){
+  cat("Reject Null Hypothesis for slope")
+  } else{
+  cat("Fail to reject the null hypothesis for slope")
+  }
+```
+
+```{r}
+#D
+
+b_r_squared = summary(bikemodel)$r.squared
+
+cat("RSquared:", round(b_r_squared,4))
+```
+
+Since the RSquared value is closer to 1 a majority of the variance in price is explained by the model
+
+```{r}
+#E
+
+elite_weight = 15
+
+b_predict = predict(bikemodel, newdata = data.frame(Weight = elite_weight))
+
+cat("Predicted price for the D'Onofrio Elite Bicylce:$", round(b_predict,2))
+```
+
+F
+The owner should not make room in their inventory for the new bike since the estimated values is more that $7000
+
+
+Problem 13
+
+```{r}
+#A
+names(repair)[1] = "Time"
+names(repair)[3] = "Type"
+names(repair)[2] = "LastService"
+
+repair_model = lm(Time ~ LastService, data =repair)
+```
+
+```{r}
+summary(repair_model)
+```
+
+```{r}
+repair_alpha = .05
+
+r_p_value_int = summary(repair_model)$coefficients["(Intercept)", "Pr(>|t|)"]
+
+if(r_p_value_int < repair_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+r_p_value_slope = summary(repair_model)$coefficients["LastService", "Pr(>|t|)"]
+
+if(r_p_value_slope < repair_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+r_r_squared = summary(repair_model)$r.squared
+
+cat("RSquared:", round(r_r_squared,4))
+```
+Since the R^2 is half way to 0 the regression model does not explain much of the variance in Last Service
+
+```{r}
+#B
+
+repair_time_pred = predict(repair_model, newdata = repair)
+
+repair_residuals = repair$Time - repair_time_pred
+
+print(repair_time_pred)
+print(repair_residuals)
+```
+
+```{r}
+sorted_residuals = repair_residuals[order(repair_residuals)]
+print(sorted_residuals)
+```
+
+For the most part the residuals that are larger tend to be electrical
+
+```{r}
+plot(repair$LastService, repair$Time,
+     col = ifelse(repair$Type == "Mechanical", "red", "blue"),
+     xlab = "Last Service",
+     ylab = "Repair Time")
+legend("topright", legend = unique(repair$Type), col=c("red","blue"), pch = 16)
+```
+
+```{r}
+plot(repair$LastService, repair$Time,
+     col = ifelse(repair$Repairperson == "Bob Jones", "red", "blue"),
+     xlab = "Last Service",
+     ylab = "Repair Time")
+legend("topright", legend = unique(repair$Repairperson), col=c("red","blue"), pch = 16)
+```
+
+```{r}
+#C
+
+repair$mechanial_dummy = ifelse(repair$Type == "Mechanical", 1, 0)
+repair$electrical_dummy = ifelse(repair$Type == "Electrical", 1, 0)
+
+repair_multi_model = lm(repair$Time ~ repair$LastService + mechanial_dummy + electrical_dummy, data = repair)
+summary(repair_multi_model)
+```
+
+Based on the coefficients we can see that we can reject the null and the R^2 is closer to 1 so the variance fits the model better with the dummy variables included.
+
+```{r}
+#D
+
+repair$bob_dummy = ifelse(repair$Repairperson == "Bob Jones", 1, 0)
+repair$donna_dummy = ifelse(repair$Repairperson == "Donna Newton", 1, 0)
+
+repair_multi_model_2 = lm(repair$Time ~ repair$LastService + bob_dummy + donna_dummy, data = repair)
+summary(repair_multi_model_2)
+```
+Based on the R^2 it has dropped by adding repair person in, so less variance is covered in this model
+
+```{r}
+#E
+
+repair_multi_model_all = lm(repair$Time ~ repair$LastService + mechanial_dummy + electrical_dummy + bob_dummy + donna_dummy, data = repair)
+
+summary(repair_multi_model_all)
+```
+We can see that by including all the variables in the model that the R^2 shows that this model has the best variance along with the Nulls
+
+F)
+I would use the model that includes all the variables since it gives the most variance and accuracy on the model
+
+
+Case Problem 1
+
+```{r}
+#1 
+
+summary(alumni)
+```
+```{r}
+#2
+
+alumni_simple_model = lm(alumni$`Alumni Giving Rate` ~ alumni$`Graduation Rate`)
+
+summary(alumni_simple_model)
+```
+```{r}
+alumni_alpha = .05
+
+a1_p_value_int = summary(alumni_simple_model)$coefficients["(Intercept)", "Pr(>|t|)"]
+
+if(a1_p_value_int < alumni_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+a1_p_value_grad = summary(alumni_simple_model)$coefficients["alumni$`Graduation Rate`", "Pr(>|t|)"]
+
+if(a1_p_value_int < alumni_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+From this model both test reject the null and the R^2 isn't very good either, only about 50% variance is covered
+
+```{r}
+#3
+
+alumni_model = lm(alumni$`Alumni Giving Rate` ~ alumni$`% of Classes Under 20` + alumni$`Student-Faculty Ratio`)
+
+summary(alumni_model)
+```
+
+```{r}
+alumni_alpha = .05
+
+a_p_value_int = summary(alumni_model)$coefficients["(Intercept)", "Pr(>|t|)"]
+
+if(a_p_value_int < alumni_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+a_p_value_class = summary(alumni_model)$coefficients["alumni$`% of Classes Under 20`", "Pr(>|t|)"]
+
+if(a_p_value_class < alumni_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+```{r}
+a_p_value_ratio = summary(repair_model)$coefficients["alumni$`Student-Faculty Ratio`", "Pr(>|t|)"]
+
+if(a_p_value_ratio < alumni_alpha){
+  cat("Reject Null Hypothesis for intercept")
+  } else{
+  cat("Fail to reject the null hypothesis for intercept")
+  }
+```
+
+From the coefficients and R^2 this model isn't as good as it cold be. We have different responses from the null tests and the R^2 value is in the middle of being close to 0 and 1, so the variance is only about 50% covered.
+
+4)
+
+I think with the right variables in a multiple regression model a more accurate prediction model can be made.
+
+5) I think that more variables such as gpa and class atendence, course level, and other factors like that could help in creating a more accurate model
+
+
+
+
+
