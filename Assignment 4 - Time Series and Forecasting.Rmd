@@ -1,0 +1,173 @@
+---
+title: "Assignment 4 - Time Series and Forecasting"
+author: "Lee Bernstein"
+date: "2024-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+sales = readxl::read_xlsx("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/Sales.xlsx")
+vintage = readxl::read_xlsx("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/Vintage.xlsx")
+
+library(tseries)
+library(forecast)
+library(dplyr)
+library(zoo)
+library(Metrics)
+library(ggplot2)
+library(reshape2)
+```
+
+
+Part 1: Sales
+
+```{r}
+#Sorting data
+sales = sales[order(as.Date(sales$Week, format="%m%d%Y")),]
+sales
+```
+
+```{r}
+#Create moving averages
+sales_wk3 = rollapply(sales$Sales, width = 3, FUN = mean)
+sales_wk4 = rollapply(sales$Sales, width = 4, FUN = mean)
+sales_wk5 = rollapply(sales$Sales, width = 5, FUN = mean)
+
+print("Moving Average 3 Weeks:")
+print(sales_wk3)
+print("Moving Average 4 Weeks:")
+sales_wk4
+print("Moving Average 5 Weeks:")
+sales_wk5
+```
+```{r}
+#Exponential Smoothing
+exp_smooth = forecast(sales_wk3, h = , method = "ets", alpha =.5)
+```
+
+```{r}
+sales = data.frame(sales)
+```
+
+```{r}
+dim_data = dim(sales)
+dim_data
+```
+
+```{r}
+#Splitting Data
+len_train = ceiling((.7*dim_data[1]))
+len_train
+```
+
+```{r}
+
+training_set = sales$Sales[1:len_train]
+test_set = sales$Sales[(len_train+1):dim_data[1]]
+```
+
+```{r}
+#Training Set plot
+plot(training_set, type="l", xlab = "Number of Weeks", ylab="Number of Sales")
+```
+
+```{r}
+#Original Plotted Data
+plot(sales$Sales, type="l", xlab = "Weeks", ylab="Number of Sales")
+```
+
+```{r}
+#Stationary Test
+kpss.test(training_set)
+adf.test(training_set)
+```
+
+```{r}
+#Determining AR needed
+pacf(training_set)
+```
+
+```{r}
+#Determine MA needed
+acf(training_set)
+```
+
+```{r}
+#ARIMA Model
+AutoArimaModel = auto.arima(training_set)
+AutoArimaModel
+```
+
+```{r}
+#Creating Forecast
+forecast = predict(arimaModel, (dim(data.frame(test_set))[1]))
+```
+
+```{r}
+#Accuracy Testing
+rmse(test_set, forecast$pred)
+mae(test_set, forecast$pred)
+mse(test_set, forecast$pred)
+mape(test_set, forecast$pred)
+```
+
+From testing the different accuracies, the model that shows the best is MAPE, since it's value is closest to 0
+
+
+Part 2: Case Study
+
+```{r}
+summary(vintage)
+```
+
+
+```{r}
+#Original Plot Data
+plot(vintage$Sales, type="l", xlab = "Months", ylab="Number of Sales")
+```
+By looking at the original data plot, there seems to be seasonality, with the highest sales in first 3 months 
+
+
+Creating a forecast for fourth year sales
+```{r}
+vintage$Month = as.Date(vintage$Month)
+```
+
+```{r}
+#Dummy Variables
+vintage$Month = factor(months(vintage$Month), levels = month.name)
+dummies = model.matrix(~ Month - 1, data = vintage)
+```
+
+```{r}
+model_data = cbind(vintage, dummies)
+```
+
+```{r}
+#Regression Model
+model = lm(vintage$Sales ~ dummies, data = model_data)
+```
+
+```{r}
+#Data Frame Creation
+fourth_year = seq(as.Date("2024-01-01"), by = "month", length.out=12)
+fourth_year_month = factor(months(fourth_year), levels = levels(vintage$Month))
+fourth_year_dummies = model.matrix(~ fourth_year_month -1)
+```
+
+```{r}
+#Turning dummy into Data Frame
+fourth_year_data = data.frame(dummies = fourth_year_dummies)
+```
+
+```{r}
+fourth_year_forecast = predict(model, newdata = fourth_year_data)
+print(fourth_year_forecast)
+```
+From this model we create dummy variables that pose as new months for a 4th year. We then take those months and combine it into the data set to predict and forecast future sales.Assuming that that January sales for the 4th year are $295,000, this model has a large forecast error. To resolve uncertainty from the model, more fine tuning and a stronger model can be made.  
+
+
+
+
