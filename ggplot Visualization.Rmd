@@ -1,0 +1,63 @@
+---
+title: "ggplot Visualization"
+author: "Lee Bernstein"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+
+phone = read.csv("/Users/leebernstein/Downloads/Advanced BA/Data Files/DataFiles/mobile_phone_prices (1).csv")
+```
+
+1) Scatterplot
+```{r}
+ggplot(phone, aes(x=int_memory,y=mobile_weight))+
+         geom_point()+
+         labs(title = "Phone Memory vs Phone Weight Scatterplot", x = "Memory", y = "Weight")
+```
+
+2)Histogram
+```{r}
+bins = sqrt(length(phone))
+print(bins)
+
+ggplot(phone, aes(x=battery_power)) +
+  geom_histogram(binwidth = 5, fill="blue", color="black")+
+  labs(title="Battery Power Histogram", x="Batter Power",y="Frequency")
+```
+3) Boxplot
+```{r}
+ggplot(phone, aes(x = factor(four_g), y = px_width))+
+  geom_boxplot(aes(group=factor(four_g)))+
+  labs(title = "4G vs Phone Pixel Width Boxplot", x="4G Availability", y="Pixel Width")
+```
+
+4)Pie Chart
+```{r}
+cores_percent = phone$number_of.cores/sum(phone$number_of.cores)*100
+
+ggplot(phone, aes(x="", y = cores_percent, fill=factor(number_of.cores)))+
+  geom_bar(stat="identity",width=1)+
+  coord_polar(theta="y")+
+  labs(title="Pie Chart of Number of Cores",
+       x=NULL,y=NULL)+
+  theme_void()+
+  theme(legend.position = "bottom")
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+

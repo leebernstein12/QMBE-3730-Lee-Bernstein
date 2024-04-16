@@ -42,6 +42,7 @@ sales_wk4
 print("Moving Average 5 Weeks:")
 sales_wk5
 ```
+
 ```{r}
 #Exponential Smoothing
 exp_smooth = forecast(sales_wk3, h = , method = "ets", alpha =.5)
@@ -63,7 +64,6 @@ len_train
 ```
 
 ```{r}
-
 training_set = sales$Sales[1:len_train]
 test_set = sales$Sales[(len_train+1):dim_data[1]]
 ```
@@ -155,6 +155,7 @@ model = lm(vintage$Sales ~ dummies, data = model_data)
 fourth_year = seq(as.Date("2024-01-01"), by = "month", length.out=12)
 fourth_year_month = factor(months(fourth_year), levels = levels(vintage$Month))
 fourth_year_dummies = model.matrix(~ fourth_year_month -1)
+
 ```
 
 ```{r}
@@ -163,11 +164,17 @@ fourth_year_data = data.frame(dummies = fourth_year_dummies)
 ```
 
 ```{r}
-fourth_year_forecast = predict(model, newdata = fourth_year_data)
+fourth_year_forecast = predict(model, (dim(newdata = fourth_year_data))[1]))
+#forecast = predict(arimaModel, (dim(data.frame(test_set))[1]))
 print(fourth_year_forecast)
 ```
 From this model we create dummy variables that pose as new months for a 4th year. We then take those months and combine it into the data set to predict and forecast future sales.Assuming that that January sales for the 4th year are $295,000, this model has a large forecast error. To resolve uncertainty from the model, more fine tuning and a stronger model can be made.  
 
+```{r}
+print(fourth_year_dummies)
+print(model$fitted.values)
+
+```
 
 
 
